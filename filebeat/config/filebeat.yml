@@ -1,0 +1,27 @@
+# ============================== Filebeat inputs ===============================
+filebeat.inputs:
+- type: log           #输入filebeat的类型 这里设置为log(默认)，即具体路径的日志  另外属性值还有stdin(键盘输入)、kafka、redis，具体可参考官网
+  enabled: true       #开启filebeat采集
+  ##symlinks: true    #采集软链接文件
+  paths:              #配置采集全局路径，后期可根据不同模块去做区分
+    - /var/elk/logs/*.log     # 指定需要收集的日志文件的路径(容器内的文件路径，所以我们需要挂载)
+  fields:             #可想输出的日志添加额外的信息
+    log_type: syslog
+  tags: ["test"]
+
+# ------------------------------ Logstash Output -------------------------------
+output.logstash:
+  hosts: ["logstash:5044"] #发送输出到logstash；host的公网ip，也可以填写docker-compose.yml中logstash的容器名如 "logstash:5044"（前提是同属于一个docker network，且类型为bridge）
+
+# ============================== Filebeat modules ==============================
+
+filebeat.config.modules:
+  # Glob pattern for configuration loading
+  path: ${path.config}/modules.d/*.yml
+
+  # Set to true to enable config reloading
+  reload.enabled: false
+
+  # Period on which files under path should be checked for changes
+  #reload.period: 10s
+
