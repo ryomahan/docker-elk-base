@@ -1,4 +1,4 @@
-- module: nginx
+- module: mynginx
   # Access logs
   access:
     enabled: true
