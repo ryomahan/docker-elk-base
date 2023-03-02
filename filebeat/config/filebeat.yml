@@ -19,6 +19,11 @@ filebeat.inputs:
 output.logstash:
   hosts: ["logstash:5044"]
 
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  indices:
+    - index: "elk-nginx-%{+yyyy.MM.dd}"
+
 # ============================== Filebeat modules ==============================
 filebeat.config.modules:
   # Glob pattern for configuration loading
