@@ -88,8 +88,10 @@ services:
       context: kibana/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+    user: root
     volumes:
       - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+      - ${NGINX_LOG_PATH}:/var/log/nginx
     ports:
       - 5601:5601
     environment:
