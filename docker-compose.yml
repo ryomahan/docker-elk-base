@@ -106,6 +106,7 @@ services:
       context: filebeat/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+    user: root
     volumes:
       - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - ./filebeat/modules.d/nginx.yml:/usr/share/filebeat/modules.d/nginx.yml
