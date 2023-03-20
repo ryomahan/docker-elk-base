@@ -10,6 +10,7 @@ services:
   # subsequent runs, the service simply returns immediately, without performing
   # any modification to existing users.
   setup:
+    container_name: all-setup
     build:
       context: setup/
       args:
@@ -35,6 +36,7 @@ services:
       - elasticsearch
 
   elasticsearch:
+    container_name: all-es
     build:
       context: elasticsearch/
       args:
@@ -61,6 +63,7 @@ services:
     restart: unless-stopped
 
   logstash:
+    container_name: all-logstash
     build:
       context: logstash/
       args:
@@ -84,11 +87,11 @@ services:
     restart: unless-stopped
 
   kibana:
+    container_name: all-kibana
     build:
       context: kibana/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
-    user: root
     volumes:
       - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
       - ${NGINX_LOG_PATH}:/var/log/nginx
@@ -101,6 +104,58 @@ services:
       - elk
     depends_on:
       - elasticsearch
+    restart: unless-stopped
+
+  filebeat:
+    container_name: all-filebeat
+    build:
+      context: filebeat/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    volumes:
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./filebeat/modules.d/nginx.yml:/usr/share/filebeat/modules.d/nginx.yml
+      - ./logs:/var/elk/logs
+      - ${NGINX_LOG_PATH}:/var/log/nginx
+    environment:
+      TZ: ${ELASTIC_TZ}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+      - logstash
+      - kibana
+    restart: unless-stopped
+
+  mysql:
+    container_name: all-mysql
+    image: mysql:8.0
+    # command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./mysql/conf/my.cnf:/etc/mysql/my.cnf
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - elk
+    restart: unless-stopped
+  
+  redis:
+    container_name: all-reids
+    image: redis:6
+    volumes:
+      - ./redis/data:/data
+      - ./redis/conf:/usr/local/etc/redis
+    ports:
+      - 6379:6379
+    networks:
+      - elk
     restart: unless-stopped
 
 networks:
