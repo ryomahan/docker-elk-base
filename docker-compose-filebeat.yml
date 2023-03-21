@@ -39,7 +39,9 @@ services:
       context: elasticsearch/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+    entrypoint: ["sh", "/apps/plugins.sh"]
     volumes:
+      - ./elasticsearch/scripts:/apps
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - elasticsearch:/usr/share/elasticsearch/data:Z
     ports:
@@ -47,6 +49,7 @@ services:
       - 9300:9300
     environment:
       TZ: ${ELASTIC_TZ}
+      ELASTIC_VERSION: ${ELASTIC_VERSION}
       node.name: elasticsearch
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       # Bootstrap password.

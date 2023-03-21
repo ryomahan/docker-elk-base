@@ -41,13 +41,16 @@ services:
       context: elasticsearch/
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
+    entrypoint: ["sh", "/apps/plugins.sh"]
     volumes:
+      - ./elasticsearch/scripts:/apps
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - elasticsearch:/usr/share/elasticsearch/data:Z
     ports:
       - 9200:9200
       - 9300:9300
     environment:
+      ELASTIC_VERSION: ${ELASTIC_VERSION}
       TZ: ${ELASTIC_TZ}
       node.name: elasticsearch
       ES_JAVA_OPTS: -Xms512m -Xmx512m
